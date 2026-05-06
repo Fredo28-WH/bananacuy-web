@@ -5,14 +5,32 @@ import { ArrowRight, Banana } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore, Product } from "@/store/productStore";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const { products, fetchData } = useProductStore();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("/logo.png");
 
   useEffect(() => {
     queueMicrotask(() => setIsHydrated(true));
     fetchData();
+
+    // Fetch dynamic logo from Supabase Storage
+    const fetchLogo = async () => {
+      const { data } = supabase.storage.from("store_assets").getPublicUrl("logo.png");
+      if (data && data.publicUrl) {
+        try {
+          const res = await fetch(data.publicUrl, { method: 'HEAD' });
+          if (res.ok) {
+            setLogoUrl(`${data.publicUrl}?t=${Date.now()}`);
+          }
+        } catch(e) {
+           console.log("Using default logo");
+        }
+      }
+    };
+    fetchLogo();
   }, [fetchData]);
 
   return (
@@ -24,12 +42,10 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
           <div className="relative w-48 h-48 md:w-56 md:h-56 mb-6 drop-shadow-2xl rounded-full bg-white/20 p-2 flex items-center justify-center">
-            <Image 
-              src="/logo.png" 
+            <img 
+              src={logoUrl} 
               alt="BananaCuuuyy Logo" 
-              fill
-              className="object-contain drop-shadow-md z-10"
-              priority
+              className="w-full h-full object-contain drop-shadow-md z-10 rounded-full bg-white"
             />
           </div>
           

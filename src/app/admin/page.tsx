@@ -701,7 +701,7 @@ export default function AdminPage() {
             <div className="flex justify-between items-center p-6 lg:p-8 border-b border-gray-50">
               <div>
                  <h2 className="text-2xl font-bold text-gray-900">Pengaturan Toko</h2>
-                 <p className="text-sm text-gray-500 mt-1">Ubah informasi toko seperti QRIS</p>
+                 
               </div>
             </div>
 
