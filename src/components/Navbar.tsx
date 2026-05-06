@@ -1,14 +1,15 @@
 "use client"
 import Link from 'next/link'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Menu, X } from 'lucide-react'
 
 export function Navbar() {
   const [activeHash, setActiveHash] = useState('')
   const [pathname, setPathname] = useState('')
   const [mounted, setMounted] = useState(false)
-  const [logoUrl, setLogoUrl] = useState('/logo.png') // Default fallback
+  const [logoUrl, setLogoUrl] = useState('/logo.png')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -42,19 +43,20 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[#facc15]">
+            <Link href="/" className="flex items-center gap-2 md:gap-3">
+              <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-[#facc15] shrink-0">
                 <img 
                   src={logoUrl} 
                   alt="BananaCuuuyy Logo" 
                   className="w-full h-full object-contain bg-white"
                 />
               </div>
-              <span className="font-extrabold text-2xl text-[#facc15]">BananaCuuuyy</span>
+              <span className="font-extrabold text-xl md:text-2xl text-[#facc15] truncate max-w-[180px] md:max-w-none">BananaCuuuyy</span>
             </Link>
           </div>
           
-          <div className="flex items-center space-x-8">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/" 
               className={`font-bold text-lg transition-colors border-b-2 ${
@@ -88,8 +90,60 @@ export function Navbar() {
               Admin
             </Link>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-[#facc15] hover:text-white p-2 focus:outline-none"
+            >
+              {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-20 left-0 w-full bg-[#3e2723] border-b border-[#facc15]/20 px-4 py-4 shadow-xl flex flex-col space-y-4">
+            <Link 
+              href="/" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`font-bold text-lg p-2 rounded-lg ${
+                mounted && pathname === '/' && activeHash === '' ? 'bg-[#facc15]/10 text-white' : 'text-[#facc15] hover:bg-[#facc15]/5 hover:text-white'
+              }`}
+            >
+              Home
+            </Link>
+            <Link 
+              href="/#menu" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`font-bold text-lg p-2 rounded-lg ${
+                mounted && activeHash === '#menu' ? 'bg-[#facc15]/10 text-white' : 'text-[#facc15] hover:bg-[#facc15]/5 hover:text-white'
+              }`}
+            >
+              Menu
+            </Link>
+            <Link 
+              href="#kontak" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`font-bold text-lg p-2 rounded-lg ${
+                mounted && activeHash === '#kontak' ? 'bg-[#facc15]/10 text-white' : 'text-[#facc15] hover:bg-[#facc15]/5 hover:text-white'
+              }`}
+            >
+              Kontak
+            </Link>
+            <Link 
+              href="/admin" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`font-bold text-lg p-2 rounded-lg ${
+                mounted && pathname === '/admin' ? 'bg-[#facc15]/10 text-white' : 'text-[#facc15] hover:bg-[#facc15]/5 hover:text-white'
+              }`}
+            >
+              Admin
+            </Link>
+        </div>
+      )}
     </nav>
   )
 }

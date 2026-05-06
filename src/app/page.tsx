@@ -41,7 +41,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 bg-[#4a3525]/10 rounded-full blur-3xl"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
-          <div className="relative w-48 h-48 md:w-56 md:h-56 mb-6 drop-shadow-2xl rounded-full bg-white/20 p-2 flex items-center justify-center">
+          <div className="relative w-40 h-40 md:w-56 md:h-56 mb-6 drop-shadow-2xl rounded-full bg-white/20 p-2 flex items-center justify-center">
             <img 
               src={logoUrl} 
               alt="BananaCuuuyy Logo" 
@@ -50,16 +50,16 @@ export default function Home() {
           </div>
           
          
-          <h1 className="text-5xl md:text-7xl font-extrabold text-[#4a3525] tracking-tight mb-6 max-w-4xl leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-[#4a3525] tracking-tight mb-4 md:mb-6 max-w-4xl leading-tight">
             BananaCuuuyy
           </h1>
-          <p className="text-lg md:text-xl text-[#4a3525]/80 mb-10 max-w-2xl font-medium">
+          <p className="text-base sm:text-lg md:text-xl text-[#4a3525]/80 mb-8 md:mb-10 max-w-2xl font-medium px-4">
             Nikmati kelezatan pisang goreng dengan topping pilihan yang melimpah!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4">
             <a 
               href="#menu" 
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#4a3525] text-[#facc15] rounded-full font-bold text-lg hover:bg-[#614631] transition-transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-4 bg-[#4a3525] text-[#facc15] rounded-full font-bold text-lg hover:bg-[#614631] transition-transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl"
             >
               Lihat Menu <ArrowRight size={20} />
             </a>
@@ -68,16 +68,16 @@ export default function Home() {
       </section>
 
       {/* Menu / Our Products Section */}
-      <section id="menu" className="py-20 bg-[#fef6e5] min-h-screen scroll-mt-10">
+      <section id="menu" className="py-16 md:py-20 bg-[#fef6e5] min-h-screen scroll-mt-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-center text-center mb-16 relative">
-            <div className="bg-[#facc15]/20 p-4 rounded-full mb-6">
-              <Banana size={48} className="text-[#4a3525]" />
+          <div className="flex flex-col items-center justify-center text-center mb-12 md:mb-16 relative">
+            <div className="bg-[#facc15]/20 p-4 rounded-full mb-4 md:mb-6">
+              <Banana size={40} className="md:w-[48px] md:h-[48px] text-[#4a3525]" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#4a3525] mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#4a3525] mb-4">
               Menu Pilihan Kami
             </h2>
-            <p className="text-lg text-[#4a3525]/70 max-w-2xl">
+            <p className="text-base md:text-lg text-[#4a3525]/70 max-w-2xl px-2">
               Pilih varian topping favoritmu! Semua dibuat dadakan, dijamin masih hangat pas sampai di tangan.
             </p>
           </div>
