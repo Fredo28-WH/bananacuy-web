@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@source "../../";
+
+@theme {
+  --color-banana: #facc15;
+  --color-banana-hover: #eab308;
+  --color-choco: #4a3525;
+  --color-choco-light: #614631;
+  --color-cream: #fef6e5;
+  --color-cream-dark: #f0e4cc;
+
+  --color-primary: var(--color-banana);
+  --color-secondary: var(--color-choco);
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-choco);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-cream-dark, currentColor);
+  }
+}
+
+html, body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  scroll-behavior: smooth;
+}
