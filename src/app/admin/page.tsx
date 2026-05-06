@@ -17,12 +17,15 @@ export default function AdminPage() {
   const [adminsList, setAdminsList] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [qrisUrl, setQrisUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
 
-  // Load existing QRIS url from public bucket if exists
+  // Load existing QRIS and Logo url from public bucket if exists
   useEffect(() => {
-    const { data } = supabase.storage.from("store_assets").getPublicUrl("qris_active.png");
-    // Append timestamp to bust cache
-    setQrisUrl(`${data.publicUrl}?t=${Date.now()}`);
+    const { data: qrisData } = supabase.storage.from("store_assets").getPublicUrl("qris_active.png");
+    setQrisUrl(`${qrisData.publicUrl}?t=${Date.now()}`);
+
+    const { data: logoData } = supabase.storage.from("store_assets").getPublicUrl("logo.png");
+    setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
   }, []);
 
   // Modal States
@@ -206,6 +209,32 @@ export default function AdminPage() {
       setQrisUrl(`${data.publicUrl}?t=${Date.now()}`);
     } catch (error: any) {
       alert("Gagal mengupload QRIS: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUploadLogo = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const { error } = await supabase.storage
+        .from('store_assets')
+        .upload('logo.png', file, { upsert: true, cacheControl: '0' });
+      
+      if (error) {
+        console.error(error);
+        if (error.message.includes('Bucket not found')) {
+           alert("Upload gagal! Anda perlu membuat Storage Bucket bernama 'store_assets' di Supabase terlebih dahulu dan pastikan di-set Public.");
+           return;
+        }
+        throw error;
+      }
+      
+      alert("Berhasil mengubah Logo Toko!");
+      const { data } = supabase.storage.from('store_assets').getPublicUrl('logo.png');
+      setLogoUrl(`${data.publicUrl}?t=${Date.now()}`);
+    } catch (error: any) {
+      alert("Gagal mengupload Logo: " + error.message);
     } finally {
       setIsUploading(false);
     }
@@ -677,6 +706,39 @@ export default function AdminPage() {
             </div>
 
             <div className="p-6 lg:p-8 space-y-8">
+              {/* Logo Section */}
+              <div className="p-5 border border-gray-100 rounded-2xl">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Logo Navbar</h3>
+                <div className="flex flex-col md:flex-row gap-6 items-start">
+                   <div className="w-24 h-24 bg-gray-50 border-2 border-dashed border-gray-200 rounded-full overflow-hidden flex flex-col items-center justify-center relative shadow-inner">
+                     {logoUrl ? (
+                        <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                     ) : (
+                        <span className="text-gray-400 text-xs font-medium">Belum ada</span>
+                     )}
+                   </div>
+                   <div className="flex-1 space-y-4">
+                     <p className="text-sm text-gray-600 leading-relaxed">
+                       Logo ini akan muncul di bagian kiri atas Navbar utama website. Format bebas (PNG direkomendasikan).
+                     </p>
+                     
+                     <label className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm cursor-pointer ${isUploading ? 'bg-gray-200 text-gray-400' : 'bg-[#4a3525] hover:bg-[#3a2815] text-[#facc15]'}`}>
+                       {isUploading ? <><span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> Mengupload...</> : <><Plus size={20} /> Upload Logo Baru</>}
+                       <input 
+                         type="file" 
+                         accept="image/*" 
+                         className="hidden" 
+                         disabled={isUploading}
+                         onChange={(e) => {
+                           if(e.target.files?.[0]) handleUploadLogo(e.target.files[0]);
+                         }}
+                       />
+                     </label>
+                   </div>
+                </div>
+              </div>
+
+              {/* QRIS Section */}
               <div className="p-5 border border-gray-100 rounded-2xl">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Gambar QRIS Toko</h3>
                 <div className="flex flex-col md:flex-row gap-6 items-start">
