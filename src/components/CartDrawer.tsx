@@ -1,6 +1,7 @@
 "use client"
 import { X, Plus, Minus, Trash2, MapPin, UploadCloud, ChevronLeft, QrCode } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
+import { useSettingStore } from '@/store/settingStore'
 import { formatOrderForWhatsApp } from '@/lib/whatsapp'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -9,6 +10,7 @@ type CheckoutStep = 'cart' | 'form_lokasi' | 'pembayaran' | 'bukti_bayar'
 
 export function CartDrawer() {
   const { isCartOpen, setIsCartOpen, items, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCartStore()
+  const { isStoreOpen } = useSettingStore()
   
   const [step, setStep] = useState<CheckoutStep>('cart')
   const [buyerName, setBuyerName] = useState('')
@@ -313,12 +315,18 @@ export function CartDrawer() {
                   <span className="font-semibold text-[#4a3525]">Total</span>
                   <span className="font-bold text-xl text-[#4a3525]">{formatIDR(getCartTotal())}</span>
                 </div>
-                <button 
-                  onClick={() => setStep('form_lokasi')}
-                  className="w-full py-3 px-4 bg-[#4a3525]/90 hover:bg-[#4a3525] text-[#facc15] font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl active:scale-95 duration-200 flex items-center justify-center gap-2"
-                >
-                  Lanjut Pengiriman
-                </button>
+                {!isStoreOpen ? (
+                   <div className="w-full py-3 px-4 bg-red-100 text-red-600 font-bold rounded-xl text-center">
+                     Mohon Maaf, Toko Sedang Tutup
+                   </div>
+                ) : (
+                  <button 
+                    onClick={() => setStep('form_lokasi')}
+                    className="w-full py-3 px-4 bg-[#4a3525]/90 hover:bg-[#4a3525] text-[#facc15] font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl active:scale-95 duration-200 flex items-center justify-center gap-2"
+                  >
+                    Lanjut Pengiriman
+                  </button>
+                )}
               </>
             )}
 

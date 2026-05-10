@@ -18,6 +18,8 @@ export default function AdminPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [qrisUrl, setQrisUrl] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [isStoreOpen, setIsStoreOpen] = useState(true);
+  const [isStatusLoading, setIsStatusLoading] = useState(false);
 
   // Load existing QRIS and Logo url from public bucket if exists
   useEffect(() => {
@@ -26,6 +28,25 @@ export default function AdminPage() {
 
     const { data: logoData } = supabase.storage.from("store_assets").getPublicUrl("logo.png");
     setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
+
+    // Check store status
+    const fetchStatus = async () => {
+      const { data } = supabase.storage.from("store_assets").getPublicUrl("store_status.json");
+      if (data?.publicUrl) {
+         try {
+           const res = await fetch(`${data.publicUrl}?t=${Date.now()}`);
+           if (res.ok) {
+             const json = await res.json();
+             if (typeof json.isOpen === "boolean") {
+               setIsStoreOpen(json.isOpen);
+             }
+           }
+         } catch (e) {
+           console.log("Status not found, assuming open");
+         }
+      }
+    };
+    fetchStatus();
   }, []);
 
   // Modal States
@@ -237,6 +258,28 @@ export default function AdminPage() {
       alert("Gagal mengupload Logo: " + error.message);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleToggleStoreStatus = async () => {
+    setIsStatusLoading(true);
+    const newStatus = !isStoreOpen;
+    const fileContent = JSON.stringify({ isOpen: newStatus });
+    const file = new File([fileContent], "store_status.json", { type: "application/json" });
+    
+    try {
+      const { error } = await supabase.storage
+        .from('store_assets')
+        .upload('store_status.json', file, { upsert: true, cacheControl: '0' });
+        
+      if (error) throw error;
+      
+      setIsStoreOpen(newStatus);
+      alert(newStatus ? "Toko berhasil DIBUKA kembali." : "Toko berhasil DITUTUP.");
+    } catch (error: any) {
+       alert("Gagal mengubah status toko: " + error.message);
+    } finally {
+       setIsStatusLoading(false);
     }
   };
 
@@ -706,6 +749,32 @@ export default function AdminPage() {
             </div>
 
             <div className="p-6 lg:p-8 space-y-8">
+              {/* Target Buka/Tutup Toko */}
+              <div className="p-5 border border-gray-100 rounded-2xl">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Status Operasional Toko</h3>
+                    <p className="text-sm text-gray-600">
+                      Jika dimatikan (Tutup), pelanggan tidak akan bisa memesan dari website.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`font-bold ${isStoreOpen ? 'text-green-600' : 'text-red-600'}`}>
+                      {isStoreOpen ? 'Toko Sedang Buka' : 'Toko Sedang Tutup'}
+                    </span>
+                    <button
+                      onClick={handleToggleStoreStatus}
+                      disabled={isStatusLoading}
+                      className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none ${isStoreOpen ? 'bg-green-500' : 'bg-gray-300'} ${isStatusLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isStoreOpen ? 'translate-x-7' : 'translate-x-1'}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Logo Section */}
               <div className="p-5 border border-gray-100 rounded-2xl">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Logo Navbar</h3>

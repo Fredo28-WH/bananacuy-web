@@ -1,20 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight, Banana } from "lucide-react";
+import { ArrowRight, Banana, AlertCircle } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useProductStore, Product } from "@/store/productStore";
+import { useSettingStore } from "@/store/settingStore";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const { products, fetchData } = useProductStore();
+  const { isStoreOpen, fetchSettings } = useSettingStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const [logoUrl, setLogoUrl] = useState("/logo.png");
 
   useEffect(() => {
     queueMicrotask(() => setIsHydrated(true));
     fetchData();
+    fetchSettings();
 
     // Fetch dynamic logo from Supabase Storage
     const fetchLogo = async () => {
@@ -53,6 +56,14 @@ export default function Home() {
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-[#4a3525] tracking-tight mb-4 md:mb-6 max-w-4xl leading-tight">
             BananaCuuuyy
           </h1>
+
+          {!isStoreOpen && (
+            <div className="mb-8 inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-lg animate-bounce">
+              <AlertCircle size={24} />
+              <span>Mohon Maaf, Toko Sedang Tutup</span>
+            </div>
+          )}
+
           <p className="text-base sm:text-lg md:text-xl text-[#4a3525]/80 mb-8 md:mb-10 max-w-2xl font-medium px-4">
             Nikmati kelezatan pisang goreng dengan topping pilihan yang melimpah!
           </p>

@@ -2,11 +2,13 @@
 import { useState } from 'react'
 import { useCartStore, Product, Addon } from '@/store/cartStore'
 import { useProductStore } from '@/store/productStore'
+import { useSettingStore } from '@/store/settingStore'
 import { ShoppingCart, X, Plus } from 'lucide-react'
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, setIsCartOpen } = useCartStore()
   const { toppings } = useProductStore()
+  const { isStoreOpen } = useSettingStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedAddons, setSelectedAddons] = useState<Addon[]>([])
 
@@ -68,18 +70,20 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="text-lg font-extrabold text-[#4a3525]">{formatIDR(product.price)}</span>
             <button 
               onClick={handleOpenModal}
-              disabled={product.isActive === false}
+              disabled={product.isActive === false || !isStoreOpen}
               className={`flex items-center justify-center gap-2 px-4 py-2 font-bold rounded-xl transition-all duration-200 shadow-md ${
-                product.isActive !== false
+                product.isActive !== false && isStoreOpen
                   ? "bg-[#facc15] hover:bg-[#eab308] text-[#4a3525] active:scale-95 hover:shadow-lg"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
-              {product.isActive !== false ? (
+              {product.isActive !== false && isStoreOpen ? (
                 <>
                   <ShoppingCart size={18} />
                   <span className="hidden sm:inline">Tambah</span>
                 </>
+              ) : !isStoreOpen ? (
+                <span className="text-sm">Toko Tutup</span>
               ) : (
                 <span className="text-sm">Habis</span>
               )}
