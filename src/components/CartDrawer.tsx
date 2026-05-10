@@ -51,6 +51,12 @@ export function CartDrawer() {
     setIsSubmitting(true)
     let paymentProofUrl: string | null = null
 
+    if (!paymentProofFile) {
+      alert("Mohon sertakan bukti transfer pembayaran (foto/screenshot) terlebih dahulu!")
+      setIsSubmitting(false)
+      return
+    }
+
     if (paymentProofFile) {
       const fileExt = paymentProofFile.name.split('.').pop()
       const fileName = `bukti_bayar_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
@@ -209,7 +215,7 @@ export function CartDrawer() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#4a3525] mb-1">Titik Lokasi Pengiriman</label>
+                <label className="block text-sm font-bold text-[#4a3525] mb-1">Titik Lokasi Pengiriman <span className="text-red-500">*</span></label>
                 <div className="flex flex-col gap-2">
                   <input 
                     type="text" 
@@ -217,6 +223,7 @@ export function CartDrawer() {
                     onChange={(e) => setBuyerLocation(e.target.value)}
                     placeholder="Link Google Maps atau ketik patokan lokasi"
                     className="w-full p-3 border-2 border-[#4a3525]/20 rounded-xl focus:border-[#facc15] focus:outline-none"
+                    required
                   />
                   <div className="flex items-center gap-2">
                     <hr className="flex-1 border-[#4a3525]/20" />
@@ -268,7 +275,7 @@ export function CartDrawer() {
           {step === 'bukti_bayar' && (
              <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
                <div className="bg-white p-4 rounded-xl shadow-sm border border-[#4a3525]/10 text-center">
-                 <h3 className="font-bold text-[#4a3525] mb-2">Upload Bukti Transfer / Screenshot</h3>
+                 <h3 className="font-bold text-[#4a3525] mb-2">Upload Bukti Transfer / Screenshot <span className="text-red-500">*</span></h3>
                  <p className="text-sm text-gray-600 mb-4">Silahkan siapkan foto atau screenshot bukti pembayaran Anda. Foto ini nantinya akan dilampirkan saat Anda meneruskan pesanan ini ke WhatsApp Admin.</p>
                  
                  <label className="cursor-pointer border-2 border-dashed border-[#4a3525]/30 rounded-xl p-8 flex flex-col items-center justify-center gap-3 hover:bg-gray-50 transition-colors mb-2">
@@ -318,8 +325,8 @@ export function CartDrawer() {
             {step === 'form_lokasi' && (
               <button 
                 onClick={() => {
-                  if(!buyerName || !buyerAddress) {
-                    alert("Mohon lengkapi Nama dan Detail Alamat terlebih dahulu!")
+                  if(!buyerName || !buyerAddress || !buyerLocation) {
+                    alert("Mohon lengkapi Nama, Detail Alamat, dan Titik Lokasi Pengiriman terlebih dahulu!")
                     return
                   }
                   setStep('pembayaran')
