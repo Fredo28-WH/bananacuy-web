@@ -166,12 +166,25 @@ export default function AdminPage() {
   };
 
   const handleSave = async () => {
+    if (!formData.name?.trim()) {
+      alert("Nama produk wajib diisi!");
+      return;
+    }
+    if (!formData.price || formData.price <= 0) {
+      alert("Harga produk wajib diisi dan harus lebih dari 0!");
+      return;
+    }
+    if (!formData.image) {
+      alert("Foto produk wajib diupload!");
+      return;
+    }
+
     if (editingId === "new") {
       await addProduct({
-        name: formData.name || "Nama Menu",
+        name: formData.name,
         description: formData.description || "",
-        price: formData.price || 0,
-        image: formData.image || "",
+        price: formData.price,
+        image: formData.image,
         isActive: formData.isActive ?? true,
       });
     } else if (editingId) {
@@ -192,10 +205,19 @@ export default function AdminPage() {
   };
 
   const handleSaveTopping = async () => {
+    if (!toppingData.name?.trim()) {
+      alert("Nama topping wajib diisi!");
+      return;
+    }
+    if (!toppingData.price || toppingData.price <= 0) {
+      alert("Harga topping wajib diisi dan harus lebih dari 0!");
+      return;
+    }
+
     if (editingToppingId === "new") {
       await addTopping({
-        name: toppingData.name || "Nama Topping",
-        price: toppingData.price || 0,
+        name: toppingData.name,
+        price: toppingData.price,
       });
     } else if (editingToppingId) {
       await updateTopping(editingToppingId, toppingData);
