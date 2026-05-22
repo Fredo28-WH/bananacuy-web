@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
           items,
           total_amount,
           payment_proof_url,
-          status: 'pending' // Status default
+          status: 'pending' // Status default (dapat diabaikan/dibiarkan jika tidak dipakai UI)
         }
       ])
       .select('id')
@@ -55,27 +55,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH: Update status order (Oleh admin)
-export async function PATCH(request: NextRequest) {
-  if (!(await checkIsAdmin())) {
-    return NextResponse.json({ error: 'Akses ditolak' }, { status: 403 });
-  }
-
-  try {
-    const { id, status } = await request.json();
-
-    if (!id || !status) {
-      return NextResponse.json({ error: 'ID dan status wajib diisi' }, { status: 400 });
-    }
-
-    const { error } = await supabaseServer
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) throw error;
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Gagal update status' }, { status: 500 });
-  }
-}

@@ -83,24 +83,6 @@ export default function AdminPage() {
     }
   };
 
-  const updateOrderStatus = async (id: string, newStatus: string) => {
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus }),
-        credentials: 'include'
-      });
-      if (res.ok) {
-        fetchOrders(); // refresh data
-      } else {
-        alert("Gagal mengupdate status order");
-      }
-    } catch (e) {
-      console.error("Error updating status", e);
-    }
-  };
-
   useEffect(() => {
     // Kalau tab admins aktif dan rolenya superadmin, fetch list admin
     if (activeTab === 'admins' && admin?.role === 'superadmin') {
@@ -550,14 +532,13 @@ export default function AdminPage() {
                      <th className="pb-3 text-sm font-semibold text-gray-500">Pelanggan</th>
                      <th className="pb-3 text-sm font-semibold text-gray-500">Pesanan</th>
                      <th className="pb-3 text-sm font-semibold text-gray-500">Total</th>
-                     <th className="pb-3 text-sm font-semibold text-gray-500">Status</th>
-                     <th className="pb-3 text-sm font-semibold text-gray-500 text-center">Aksi / Bukti</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500 text-center">Bukti Bayar</th>
                    </tr>
                  </thead>
                  <tbody className="divide-y divide-gray-50">
                    {ordersList.length === 0 ? (
                      <tr>
-                       <td colSpan={6} className="py-8 text-center text-gray-500">Belum ada pesanan</td>
+                       <td colSpan={5} className="py-8 text-center text-gray-500">Belum ada pesanan</td>
                      </tr>
                    ) : (
                      ordersList.map(order => (
@@ -583,22 +564,6 @@ export default function AdminPage() {
                          <td className="py-4 text-sm font-bold text-gray-900">
                            Rp {parseInt(order.total_amount).toLocaleString('id-ID')}
                          </td>
-                         <td className="py-4 text-sm">
-                            <select 
-                              value={order.status} 
-                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                              className={`text-xs font-bold px-2 py-1 rounded-full outline-none cursor-pointer ${
-                                order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                                order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                              }`}
-                            >
-                              <option value="pending" className="bg-white text-black">Pending</option>
-                              <option value="processing" className="bg-white text-black">Diproses</option>
-                              <option value="completed" className="bg-white text-black">Selesai</option>
-                              <option value="cancelled" className="bg-white text-black">Dibatalkan</option>
-                            </select>
-                         </td>
                          <td className="py-4 text-center">
                             {order.payment_proof_url ? (
                               <a href={order.payment_proof_url} target="_blank" rel="noreferrer" className="text-xs font-bold bg-[#4a3525] text-[#facc15] px-3 py-1.5 rounded-lg hover:bg-[#3a2815] transition-colors inline-block">
@@ -623,7 +588,7 @@ export default function AdminPage() {
             <div className="flex justify-between items-center p-6 lg:p-8 border-b border-gray-50">
               <div>
                  <h2 className="text-2xl font-bold text-gray-900">Daftar Produk</h2>
-                 <p className="text-sm text-gray-500 mt-1">Kelola menu pisang dan minuman</p>
+                 <p className="text-sm text-gray-500 mt-1">Kelola Produk</p>
               </div>
               <button
                 onClick={() => {
