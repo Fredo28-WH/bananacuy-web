@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProductStore, Product, Topping } from "@/store/productStore";
-import { Edit2, Plus, Trash2, Save, X, Utensils, IceCream, Users, LogOut, KeyRound, Settings, CheckCircle2 } from "lucide-react";
+import { Edit2, Plus, Trash2, Save, X, Utensils, IceCream, Users, LogOut, KeyRound, Settings, CheckCircle2, ClipboardList } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
 import { ConfirmModal, InputModal } from "@/components/Modals";
 import { supabase } from "@/lib/supabase";
@@ -13,8 +13,9 @@ export default function AdminPage() {
   const { admin, setAdmin, logout } = useAdminStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [activeTab, setActiveTab] = useState<'products' | 'toppings' | 'admins' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'toppings' | 'admins' | 'settings' | 'orders'>('products');
   const [adminsList, setAdminsList] = useState<any[]>([]);
+  const [ordersList, setOrdersList] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [qrisUrl, setQrisUrl] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
@@ -69,10 +70,45 @@ export default function AdminPage() {
     }
   };
 
+  // Fetch Orders dari API
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch('/api/orders', {credentials: 'include'});
+      if (res.ok) {
+        const json = await res.json();
+        setOrdersList(json.data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch orders", e);
+    }
+  };
+
+  const updateOrderStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus }),
+        credentials: 'include'
+      });
+      if (res.ok) {
+        fetchOrders(); // refresh data
+      } else {
+        alert("Gagal mengupdate status order");
+      }
+    } catch (e) {
+      console.error("Error updating status", e);
+    }
+  };
+
   useEffect(() => {
     // Kalau tab admins aktif dan rolenya superadmin, fetch list admin
     if (activeTab === 'admins' && admin?.role === 'superadmin') {
       fetchAdmins();
+    }
+    // Kalau tab orders aktif, fetch orders
+    if (activeTab === 'orders' && admin) {
+      fetchOrders();
     }
   }, [activeTab, admin]);
 
@@ -395,6 +431,13 @@ export default function AdminPage() {
           >
             <IceCream size={20} className={activeTab === 'toppings' ? 'text-[#facc15]' : ''}/> Addons & Topping
           </button>
+
+          <button 
+            onClick={() => setActiveTab('orders')} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'orders' ? 'bg-[#facc15]/10 text-[#4a3525]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+          >
+            <ClipboardList size={20} className={activeTab === 'orders' ? 'text-[#facc15]' : ''}/> History Pembelian
+          </button>
           
           <button 
             onClick={() => setActiveTab('settings')} 
@@ -488,6 +531,90 @@ export default function AdminPage() {
                 ))}
              </div>
            </div>
+        )}
+
+        {/* ORDERS SECTION */}
+        {activeTab === 'orders' && (
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100/50 overflow-hidden">
+            <div className="flex justify-between items-center p-6 lg:p-8 border-b border-gray-50">
+              <div>
+                 <h2 className="text-2xl font-bold text-gray-900">History Pembelian</h2>
+                 <p className="text-sm text-gray-500 mt-1">Daftar pesanan dari pelanggan</p>
+              </div>
+            </div>
+            <div className="p-6 lg:p-8 overflow-x-auto">
+               <table className="w-full text-left border-collapse min-w-[800px]">
+                 <thead>
+                   <tr className="border-b-2 border-gray-100">
+                     <th className="pb-3 text-sm font-semibold text-gray-500">Tanggal</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500">Pelanggan</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500">Pesanan</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500">Total</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500">Status</th>
+                     <th className="pb-3 text-sm font-semibold text-gray-500 text-center">Aksi / Bukti</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-50">
+                   {ordersList.length === 0 ? (
+                     <tr>
+                       <td colSpan={6} className="py-8 text-center text-gray-500">Belum ada pesanan</td>
+                     </tr>
+                   ) : (
+                     ordersList.map(order => (
+                       <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
+                         <td className="py-4 text-sm text-gray-900">{new Date(order.created_at).toLocaleString('id-ID')}</td>
+                         <td className="py-4">
+                            <p className="font-bold text-gray-900 text-sm">{order.buyer_name}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 max-w-[200px] truncate">{order.buyer_address}</p>
+                            {order.buyer_location && (
+                               <a href={order.buyer_location} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:text-blue-700 underline">Lihat Peta</a>
+                            )}
+                         </td>
+                         <td className="py-4">
+                            <ul className="text-xs text-gray-600 list-disc list-inside">
+                              {order.items?.map((item: any, idx: number) => (
+                                <li key={idx}>
+                                  {item.quantity}x {item.name} 
+                                  {item.selectedAddons?.length > 0 && ` (+${item.selectedAddons.map((a:any)=>a.name).join(', ')})`}
+                                </li>
+                              ))}
+                            </ul>
+                         </td>
+                         <td className="py-4 text-sm font-bold text-gray-900">
+                           Rp {parseInt(order.total_amount).toLocaleString('id-ID')}
+                         </td>
+                         <td className="py-4 text-sm">
+                            <select 
+                              value={order.status} 
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              className={`text-xs font-bold px-2 py-1 rounded-full outline-none cursor-pointer ${
+                                order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                                order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                              }`}
+                            >
+                              <option value="pending" className="bg-white text-black">Pending</option>
+                              <option value="processing" className="bg-white text-black">Diproses</option>
+                              <option value="completed" className="bg-white text-black">Selesai</option>
+                              <option value="cancelled" className="bg-white text-black">Dibatalkan</option>
+                            </select>
+                         </td>
+                         <td className="py-4 text-center">
+                            {order.payment_proof_url ? (
+                              <a href={order.payment_proof_url} target="_blank" rel="noreferrer" className="text-xs font-bold bg-[#4a3525] text-[#facc15] px-3 py-1.5 rounded-lg hover:bg-[#3a2815] transition-colors inline-block">
+                                Bukti Bayar
+                              </a>
+                            ) : (
+                              <span className="text-xs text-gray-400 italic">Tidak ada bukti</span>
+                            )}
+                         </td>
+                       </tr>
+                     ))
+                   )}
+                 </tbody>
+               </table>
+            </div>
+          </div>
         )}
 
         {/* PRODUCTS SECTION */}

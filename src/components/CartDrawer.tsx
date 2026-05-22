@@ -82,6 +82,28 @@ export function CartDrawer() {
     }
 
     const total = getCartTotal()
+    
+    // Save order ke database via API
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyer_name: buyerName,
+          buyer_address: buyerAddress,
+          buyer_location: buyerLocation,
+          items: items,
+          total_amount: total,
+          payment_proof_url: paymentProofUrl
+        })
+      });
+      if (!res.ok) {
+        console.error("Gagal simpan ke database");
+      }
+    } catch (e) {
+      console.error("Error saving order:", e);
+    }
+
     const url = formatOrderForWhatsApp(items, total, buyerName, buyerAddress, buyerLocation, paymentProofUrl)
     window.open(url, '_blank')
     clearCart()
